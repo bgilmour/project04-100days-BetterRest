@@ -57,11 +57,13 @@ struct ContentView: View {
 
     var enterCoffeeIntake: some View {
         Section(header: Text("Daily coffee intake")) {
-            Stepper(value: $coffeeAmount, in: 1 ... 20) {
-                if coffeeAmount == 1 {
-                    Text("1 cup")
-                } else {
-                    Text("\(coffeeAmount) cups")
+            Picker("Number of cups", selection: $coffeeAmount) {
+                ForEach(1 ... 20, id: \.self) {
+                    if $0 == 1 {
+                        Text("1 cup")
+                    } else {
+                        Text("\($0) cups")
+                    }
                 }
             }
         }

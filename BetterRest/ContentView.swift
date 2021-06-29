@@ -11,9 +11,6 @@ struct ContentView: View {
     @State private var wakeUp = defaultWakeTime
     @State private var sleepAmount = 8.0
     @State private var coffeeAmount = 1
-    @State private var alertTitle = ""
-    @State private var alertMessage = ""
-    @State private var alertShowing = false
 
     var body: some View {
         NavigationView {
@@ -23,12 +20,10 @@ struct ContentView: View {
                 enterDesiredSleep
 
                 enterCoffeeIntake
+
+                displayRecommendedBedtime
             }
             .navigationBarTitle("BetterRest")
-            .navigationBarItems(trailing: displayCalculateButton)
-            .alert(isPresented: $alertShowing) {
-                displayAlert
-            }
         }
     }
 
@@ -57,29 +52,29 @@ struct ContentView: View {
 
     var enterCoffeeIntake: some View {
         Section(header: Text("Daily coffee intake")) {
-            Picker("Number of cups", selection: $coffeeAmount) {
-                ForEach(1 ... 20, id: \.self) {
-                    if $0 == 1 {
-                        Text("1 cup")
-                    } else {
-                        Text("\($0) cups")
-                    }
+            Stepper(value: $coffeeAmount, in: 1 ... 20) {
+                if coffeeAmount == 1 {
+                    Text("1 cup")
+                } else {
+                    Text("\(coffeeAmount) cups")
                 }
             }
         }
     }
 
-    var displayCalculateButton: some View {
-        Button(action: calculateBedtime) {
-            Text("Calculate")
+    var displayRecommendedBedtime: some View {
+        Section(header: Text("Recommended bedtime")) {
+            HStack(spacing: 0) {
+                Spacer()
+                Text(recommendedBedtime)
+                    .font(.largeTitle)
+                    .foregroundColor(/*@START_MENU_TOKEN@*/.blue/*@END_MENU_TOKEN@*/)
+                Spacer()
+            }
         }
     }
 
-    var displayAlert: Alert {
-        Alert(title: Text(alertTitle), message: Text(alertMessage), dismissButton: .default(Text("OK")))
-    }
-
-    func calculateBedtime() {
+    var recommendedBedtime: String {
         let model = SleepCalculator()
         let components = Calendar.current.dateComponents([.hour, .minute], from: wakeUp)
         let hour = (components.hour ?? 0) * 60 * 60
@@ -90,13 +85,10 @@ struct ContentView: View {
             let sleepTime = wakeUp - prediction.actualSleep
             let formatter = DateFormatter()
             formatter.timeStyle = .short
-            alertTitle = "Your ideal bedtime is..."
-            alertMessage = formatter.string(from: sleepTime)
+            return formatter.string(from: sleepTime)
         } catch {
-            alertTitle = "Error"
-            alertMessage = "Something went wrong and we can't predict your bedtime."
+            return "Unknown"
         }
-        alertShowing = true
     }
 
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var wakeUp = Date()
+    @State private var wakeUp = defaultWakeTime
     @State private var sleepAmount = 8.0
     @State private var coffeeAmount = 1
     @State private var alertTitle = ""
@@ -17,7 +17,7 @@ struct ContentView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
+            Form {
                 enterWakeUpTime
 
                 enterDesiredSleep
@@ -27,23 +27,31 @@ struct ContentView: View {
             .navigationBarTitle("BetterRest")
             .navigationBarItems(trailing: displayCalculateButton)
             .alert(isPresented: $alertShowing) {
-                Alert(title: Text(alertTitle), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+                displayAlert
             }
         }
     }
 
+    static var defaultWakeTime: Date {
+        var components = DateComponents()
+        components.hour = 7
+        components.minute = 0
+        return Calendar.current.date(from: components) ?? Date()
+    }
+
     var enterWakeUpTime: some View {
-        Group {
+        VStack(alignment: .leading, spacing: 0) {
             Text("When do you want to wake up?")
                 .font(.headline)
 
             DatePicker("Please enter a time", selection: $wakeUp, displayedComponents: .hourAndMinute)
                 .labelsHidden()
+                .datePickerStyle(WheelDatePickerStyle())
         }
     }
 
     var enterDesiredSleep: some View {
-        Group {
+        VStack(alignment: .leading, spacing: 0) {
             Text("Desired amount of sleep")
                 .font(.headline)
 
@@ -54,7 +62,7 @@ struct ContentView: View {
     }
 
     var enterCoffeeIntake: some View {
-        Group {
+        VStack(alignment: .leading, spacing: 0) {
             Text("Daily coffee intake")
                 .font(.headline)
 
@@ -72,6 +80,10 @@ struct ContentView: View {
         Button(action: calculateBedtime) {
             Text("Calculate")
         }
+    }
+
+    var displayAlert: Alert {
+        Alert(title: Text(alertTitle), message: Text(alertMessage), dismissButton: .default(Text("OK")))
     }
 
     func calculateBedtime() {
